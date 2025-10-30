@@ -1,23 +1,68 @@
-UI/UX Guidelines — FruitsForYou Platform
+# 🌟 UI/UX Guidelines — FruitsForYou Agro-Avocado Platform
 
-Purpose
+## Purpose & Context
 
-- Provide a single-source-of-truth for UI and UX rules across the FruitsForYou platform.
-- Keep interfaces consistent, accessible, and easy to use for all users.
+Our platform serves three primary user groups with distinct needs:
+- 🌱 **Farm Managers:** Mobile-friendly data entry for harvest logs and chemical applications
+- 🚚 **Logistics Coordinators:** Real-time shipment tracking and documentation
+- 🔍 **QA/QC Teams:** Complex quality control forms and lab result management
 
-Content contract (inputs/outputs)
+### Core Objectives
+- Standardize the user experience across all platform modules
+- Ensure critical information is accessible within three clicks
+- Optimize complex workflows for mobile and desktop use
+- Maintain clear data visualization for traceability records
 
-- Inputs: component props, user actions, data states (loading, empty, error, success).
-- Outputs: predictable UI states, accessible elements, and clear affordances.
+### Content Contract (Inputs/Outputs)
 
-Design tokens
+#### Inputs
+- User actions and permissions based on role
+- Real-time data states (temperature logs, QC results)
+- Document uploads (certificates, lab reports)
+- Form submissions (harvest data, quality checks)
 
-- Primary color: use --color-primary (or Tailwind: bg-emerald-600 / text-emerald-600)
-- Accent color: --color-accent (Tailwind: bg-amber-400 / text-amber-400)
-- Neutral: grays for surfaces and borders (Tailwind: gray-50..900)
-- Spacing scale: 4px * [1,2,3,4,6,8] -> (1=4px, 2=8px, 3=12px, 4=16px, 6=24px, 8=32px)
-- Border radius: 6px (Tailwind: rounded-md)
-- Typography: system font stack, sizes in rem—base 16px.
+#### Outputs
+- Role-specific dashboards with prioritized information
+- Clear status indicators for lot tracking
+- Accessible error messages and validation feedback
+- Export-ready reports and documentation
+
+## 🎨 Design System
+
+### Color Tokens
+
+#### Base Colors
+- Primary: `--color-primary` (Tailwind: bg-emerald-600) - Brand identity
+- Secondary: `--color-accent` (Tailwind: bg-amber-400) - Interactive elements
+- Neutral: Grays for surfaces (Tailwind: gray-50..900)
+
+#### Status Colors (Industry-Specific)
+- `--status-optimal` (Tailwind: bg-green-500) - Perfect quality, compliant
+- `--status-acceptable` (Tailwind: bg-blue-500) - Within tolerance
+- `--status-warning` (Tailwind: bg-amber-500) - Requires attention
+- `--status-critical` (Tailwind: bg-red-500) - Quality issue, non-compliant
+- `--temp-alert` (Tailwind: bg-rose-600) - Temperature breach
+
+### Typography System
+
+#### Fonts
+- Headers: Inter Semi-bold (Clear hierarchy for dashboards)
+- Body: Inter Regular (Optimal readability for forms)
+- Data/Metrics: Roboto Mono (Clear number display)
+
+#### Size Scale (rem, base: 16px)
+- Micro (tooltips): 0.75rem
+- Body: 1rem
+- Section headers: 1.25rem
+- Page titles: 1.5rem
+- Dashboard numbers: 2rem
+
+### Spacing & Layout
+- Grid: 4px base unit
+- Spacing scale: 4px * [1,2,3,4,6,8]
+- Form field spacing: 16px (4 * 4px)
+- Section padding: 24px (6 * 4px)
+- Card radius: 6px (Tailwind: rounded-md)
 
 Accessibility (A11y)
 
@@ -34,12 +79,38 @@ Layout & spacing
 - Consistent padding on containers: typically p-4 / p-6 depending on density.
 - Group related actions together and separate destructive actions from primary actions.
 
-Forms & Inputs
+## 📝 Forms & Data Entry
 
-- Label every input; place labels above inputs when possible.
-- Provide inline validation and friendly error messages; errors should be programmatic (aria-live) for screen readers.
-- Use placeholders only as examples, not as labels.
-- Primary action appears on the right (or bottom-right on mobile). Secondary actions are less visually prominent.
+### Form Organization
+- Group related fields logically (e.g., all temperature readings together)
+- Use progressive disclosure for complex QC forms
+- Implement smart defaults based on lot type
+- Enable bulk data entry for batch processing
+
+### Field Types & Validation
+- **Required Fields:** Mark clearly with red asterisk (*)
+- **Numeric Inputs:** 
+  - Show valid ranges (e.g., "Temperature: 0-30°C")
+  - Implement unit conversion where needed
+  - Use steppers for precise adjustments
+- **Date/Time Fields:**
+  - Default to current date/time for logs
+  - Validate against lot timeline (e.g., harvest date)
+- **Dropdown Menus:**
+  - Include search for long lists
+  - Group related options (e.g., by certification type)
+
+### Mobile Optimization
+- Touch-friendly input sizes (min 44px height)
+- Simplified forms for field use
+- Offline data entry capability
+- Camera integration for documentation
+
+### Validation Rules
+- Immediate feedback for critical fields
+- Batch validation for complex forms
+- Clear error messages with resolution steps
+- Warning indicators for unusual values
 
 Buttons & Actions
 
@@ -48,11 +119,47 @@ Buttons & Actions
 - Disabled state: reduced opacity and non-interactive.
 - Always include an icon only when it adds meaning; use accessible labels for icon-only buttons.
 
-States & Feedback
+## ⚙️ States & Feedback
 
-- Loading states: show skeletons or spinners with the same layout to avoid layout shifts.
-- Success and error states must be clear and short; use consistent colors (success = green, error = red) and icons.
-- Toasts: short messages, dismissible, do not block interaction.
+### Critical Alerts
+- **Temperature Breaches:**
+  - Modal overlay with sound
+  - Immediate notification to QC team
+  - Clear action steps
+- **Quality Control Failures:**
+  - Red banner with details
+  - Required acknowledgment
+  - Automated escalation
+
+### Status Indicators
+- **Lot Status:**
+  - 🟢 Compliant
+  - 🟡 Pending Review
+  - 🔴 Non-compliant
+- **Document Status:**
+  - 📋 Draft
+  - ✅ Verified
+  - ❌ Rejected
+
+### Progress Feedback
+- **Loading States:**
+  - Skeleton layouts for data tables
+  - Progress bars for uploads
+  - Background sync indicators
+- **Success States:**
+  - Clear confirmation messages
+  - Next step suggestions
+  - Undo options where applicable
+
+### Error Handling
+- **Validation Errors:**
+  - Inline field feedback
+  - Form-level summaries
+  - Quick-fix suggestions
+- **System Errors:**
+  - Offline mode activation
+  - Auto-retry options
+  - Support contact info
 
 Navigation
 
@@ -60,11 +167,38 @@ Navigation
 - Use breadcrumbs for deep flows (multi-step processes) and clearly indicate current step.
 - Mobile: use bottom navigation or hamburger depending on available top-level sections.
 
-Data tables & Lists
+## 📊 Data Visualization & Lists
 
-- Offer sortable columns and persistent filters where needed.
-- Provide concise summaries and allow row expansion for details rather than loading full pages.
-- Paginate large datasets; prefer server-side pagination for performance.
+### Traceability Tables
+- **Quick Filters:**
+  - Lot status (Processing, In Transit, Completed)
+  - Date ranges (Last 24h, Week, Month)
+  - Quality grade (Premium, Standard, Processing)
+- **Column Configuration:**
+  - Pin critical columns (Lot ID, Status)
+  - Allow custom column arrangements
+  - Export view configurations
+
+### Quality Control Dashboards
+- **Summary Cards:**
+  - Current lot status
+  - Recent quality scores
+  - Temperature compliance
+- **Interactive Charts:**
+  - Temperature over time (line charts)
+  - Defect distribution (bar charts)
+  - Quality trends (radar charts)
+
+### Mobile Views
+- Prioritize key metrics
+- Swipe actions for common tasks
+- Collapse detailed data into expandable sections
+
+### Performance Optimization
+- Progressive loading for large datasets
+- Server-side filtering and sorting
+- Cached recent searches
+- Optimized for slow connections
 
 Dialogs & Modals
 

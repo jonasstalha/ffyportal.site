@@ -146,7 +146,7 @@ const ControleReception: React.FC = () => {
   const duplicateLot = (lotId: string) => {
     const lot = lots.find(l => l.id === lotId);
     if (!lot) return;
-    
+
     const newLot: QualityControlLot = {
       id: Date.now().toString(),
       lotNumber: `${lot.lotNumber} (Copie)`,
@@ -175,7 +175,7 @@ const ControleReception: React.FC = () => {
 
   const updateCurrentLot = (updates: Partial<QualityControlData>) => {
     if (!currentLot) return;
-    
+
     const updatedLot = {
       ...currentLot,
       data: {
@@ -186,7 +186,7 @@ const ControleReception: React.FC = () => {
       },
       updatedAt: new Date(),
     };
-    
+
     setLots(lots.map(l => l.id === currentLotId ? updatedLot : l));
   };
 
@@ -269,10 +269,10 @@ const ControleReception: React.FC = () => {
     const autoTable = (await import('jspdf-autotable')).default as any;
     const doc = new jsPDFClass({ orientation: 'portrait', unit: 'mm', format: 'a4' });
 
-  const margin = 6;
-  const pageWidth = doc.internal.pageSize.getWidth();
+    const margin = 6 ;
+    const pageWidth = doc.internal.pageSize.getWidth();
     const contentWidth = pageWidth - margin * 2;
-  doc.setLineHeightFactor(1.0);
+    doc.setLineHeightFactor(1.0);
 
     const colors = {
       lime300: [190, 242, 100] as const,
@@ -282,12 +282,12 @@ const ControleReception: React.FC = () => {
     };
 
     // Header frame like page
-  const headerH = 30;
-    const leftW = 22;
+    const headerH = 30;
+    const leftW = 32;
     const rightW = 40;
     const centerW = contentWidth - leftW - rightW;
     doc.setDrawColor(...colors.border);
-  doc.setLineWidth(0.3);
+    doc.setLineWidth(0.3);
     // Outer
     doc.rect(margin, margin, contentWidth, headerH);
     // Separators
@@ -296,20 +296,20 @@ const ControleReception: React.FC = () => {
     // Center title band
     const centerX0 = margin + leftW;
     doc.setFillColor(...colors.lime300);
-  const titleBandH = 10;
+    const titleBandH = 10;
     doc.rect(centerX0, margin, centerW, titleBandH, 'F');
     doc.setFont('helvetica', 'bold');
     doc.setTextColor(0, 0, 0);
-  doc.setFontSize(11);
-  doc.text('Fiche de contrôle à la réception (avocat)', centerX0 + centerW / 2, margin + 6.5, { align: 'center' });
-  doc.text('SYSTEME DE GESTION DE LA QUALITE', centerX0 + centerW / 2, margin + titleBandH + 7.5, { align: 'center' });
+    doc.setFontSize(11);
+    doc.text('Fiche de contrôle à la réception (avocat)', centerX0 + centerW / 2, margin + 6.5, { align: 'center' });
+    doc.text('SYSTEME DE GESTION DE LA QUALITE', centerX0 + centerW / 2, margin + titleBandH + 7.5, { align: 'center' });
     // Right info rows
     const rightX0 = margin + leftW + centerW;
     const rowH = headerH / 3;
     doc.line(rightX0, margin + rowH, rightX0 + rightW, margin + rowH);
     doc.line(rightX0, margin + rowH * 2, rightX0 + rightW, margin + rowH * 2);
     doc.setFont('helvetica', 'normal');
-  doc.setFontSize(9);
+    doc.setFontSize(9);
     doc.text(`Réf : ${currentLot.data.header.ref}`, rightX0 + 2, margin + rowH - 2);
     doc.text(`Version : ${currentLot.data.header.version}`, rightX0 + 2, margin + rowH * 2 - 2);
     doc.text(`Date : ${currentLot.data.header.date}`, rightX0 + 2, margin + rowH * 3 - 2);
@@ -318,7 +318,7 @@ const ControleReception: React.FC = () => {
     const toDataURL = async (url: string): Promise<string> => {
       try {
         if (typeof url === 'string' && url.startsWith('data:')) return url;
-      } catch (e) {}
+      } catch (e) { }
 
       try {
         const res = await fetch(url);
@@ -387,78 +387,91 @@ const ControleReception: React.FC = () => {
     // Table body matching page
     const rec = currentLot.data.header;
     const qc = currentLot.data.qualityChecks;
-    const checkbox = (b: boolean) => (b ? '☑' : '☐');
-
+    const widths = [25, 25, 25, 25, 25, 20]; // adjust anytime
     autoTable(doc, {
-      startY: margin + headerH + 2,
-  styles: { font: 'helvetica', fontSize: 9, cellPadding: { top: 1, right: 1, bottom: 1, left: 1 }, lineColor: colors.border, lineWidth: 0.3, textColor: colors.text },
-  margin: { left: margin, right: margin, bottom: 32 },
+      startY: margin + headerH + 4,
+      styles: { font: 'helvetica', fontSize: 9, cellPadding: { top: 1.5, right: 2, bottom: 1.5, left: 2 }, lineColor: colors.border, lineWidth: 0.3, textColor: colors.text },
+      margin: { left: margin, right: margin, bottom: 30 },
       theme: 'grid',
-  tableWidth: contentWidth,
+      tableWidth: contentWidth,
+       columnStyles: {
+    0: { cellWidth: widths[0] },
+    1: { cellWidth: widths[1] },
+    2: { cellWidth: widths[2] },
+    3: { cellWidth: widths[3] },
+    4: { cellWidth: widths[4] },
+    5: { cellWidth: widths[5] },
+  },
       body: [
         [
-          { content: 'Date', styles: { fillColor: colors.lime300, fontStyle: 'bold' } },
-          { content: rec.deliveryDate || '' },
-          { content: 'Gamme de produit :', styles: { fillColor: colors.lime300, fontStyle: 'bold' } },
-          { content: `${checkbox(rec.conventionnel)} Conventionnel  ${checkbox(rec.bio)} BIO` },
-          { content: 'Prestataire :', styles: { fillColor: colors.lime300, fontStyle: 'bold' } },
-          { content: rec.provider || '' },
-          { content: 'Protocole : 1 Caisse (23KG) / 12palette', styles: { fillColor: colors.lime300, fontStyle: 'bold' } },
+          { content: 'Date', styles: { fillColor: colors.lime300, fontStyle: 'bold' }, cellWidth: 20 },
+          { content: rec.deliveryDate || '', cellWidth: 40 },
+          { content: 'Gamme de produit :', styles: { fillColor: colors.lime300, fontStyle: 'bold' }, cellWidth: 20 },
+          { content: `${checkbox(rec.bio)} BIO`, cellWidth: 30 },
+          { content: rec.provider || '', cellWidth: 20 },
+          { content: '1 Caisse (23KG) / 12palette', styles: { fillColor: colors.lime300, fontStyle: 'bold' }, cellWidth: 40 },
         ],
 
-        [ { content: 'N° de Bon de livraison', styles: { fillColor: colors.lime300, fontStyle: 'bold' } }, { content: rec.deliveryBonNumber || '', colSpan: 6 } ],
-        [ { content: 'N° de bon de réception', styles: { fillColor: colors.lime300, fontStyle: 'bold' } }, { content: rec.receptionBonNumber || '', colSpan: 6 } ],
-        [ { content: 'Heure de réception', styles: { fillColor: colors.lime300, fontStyle: 'bold' } }, { content: rec.receptionTime || '', colSpan: 6 } ],
-        [ { content: 'Etats des caisses (C/NC)', styles: { fillColor: colors.lime300, fontStyle: 'bold' } }, { content: rec.boxState || '', colSpan: 6 } ],
-        [ { content: 'Matricule', styles: { fillColor: colors.lime300, fontStyle: 'bold' } }, { content: rec.matricule || '', colSpan: 6 } ],
-        [ { content: 'Variété', styles: { fillColor: colors.lime300, fontStyle: 'bold' } }, { content: rec.variety || '', colSpan: 6 } ],
-        [ { content: 'Producteur', styles: { fillColor: colors.lime300, fontStyle: 'bold' } }, { content: rec.producer || '', colSpan: 6 } ],
-        [ { content: 'Contrôle qualité de états Camion : Odeur ; corps étranger ; nettoyage. (C/NC)', styles: { fillColor: colors.lime300, fontStyle: 'bold' } }, { content: rec.truckQuality || '', colSpan: 6 } ],
-        [ { content: 'Nombre total de palettes', styles: { fillColor: colors.lime300, fontStyle: 'bold' } }, { content: rec.totalPallets || '', colSpan: 6 } ],
-        [ { content: 'Poids NET', styles: { fillColor: colors.lime300, fontStyle: 'bold' } }, { content: rec.netWeight || '', colSpan: 6 } ],
-        [ { content: 'N° de lot du produit', styles: { fillColor: colors.lime300, fontStyle: 'bold' } }, { content: rec.productLotNumber || '', colSpan: 6 } ],
+        [{ content: 'N° de Bon de livraison', styles: { fillColor: colors.lime300, fontStyle: 'bold' } }, { content: rec.deliveryBonNumber || '', colSpan: 6 }],
+        [{ content: 'N° de bon de réception', styles: { fillColor: colors.lime300, fontStyle: 'bold' } }, { content: rec.receptionBonNumber || '', colSpan: 6 }],
+        [{ content: 'Heure de réception', styles: { fillColor: colors.lime300, fontStyle: 'bold' } }, { content: rec.receptionTime || '', colSpan: 6 }],
+        [{ content: 'Etats des caisses (C/NC)', styles: { fillColor: colors.lime300, fontStyle: 'bold' } }, { content: rec.boxState || '', colSpan: 6 }],
+        [{ content: 'Matricule', styles: { fillColor: colors.lime300, fontStyle: 'bold' } }, { content: rec.matricule || '', colSpan: 6 }],
+        [{ content: 'Variété', styles: { fillColor: colors.lime300, fontStyle: 'bold' } }, { content: rec.variety || '', colSpan: 6 }],
+        [{ content: 'Producteur', styles: { fillColor: colors.lime300, fontStyle: 'bold' } }, { content: rec.producer || '', colSpan: 6 }],
+        [{ content: 'Contrôle qualité de états Camion : Odeur ; corps étranger ; nettoyage. (C/NC)', styles: { fillColor: colors.lime300, fontStyle: 'bold' } }, { content: rec.truckQuality || '', colSpan: 6 }],
+        [{ content: 'Nombre total de palettes', styles: { fillColor: colors.lime300, fontStyle: 'bold' } }, { content: rec.totalPallets || '', colSpan: 6 }],
+        [{ content: 'Poids NET', styles: { fillColor: colors.lime300, fontStyle: 'bold' } }, { content: rec.netWeight || '', colSpan: 6 }],
+        [{ content: 'N° de lot du produit', styles: { fillColor: colors.lime300, fontStyle: 'bold' } }, { content: rec.productLotNumber || '', colSpan: 6 }],
 
-        [ { content: 'Nbr Fruit avec trace de maladie', rowSpan: 2, styles: { fillColor: colors.lime300, fontStyle: 'bold' } },
-          { content: 'Nbr de fruits (max 10u)', styles: { fillColor: colors.lime200, fontStyle: 'bold', halign: 'center' } },
-          { content: 'Poids', styles: { fillColor: colors.lime200, fontStyle: 'bold', halign: 'center' } },
-          { content: '%', styles: { fillColor: colors.lime200, fontStyle: 'bold', halign: 'center' } },
-          { content: '', colSpan: 3 } ],
-        [ { content: qc.diseaseTraces.count || '' }, { content: qc.diseaseTraces.weight || '' }, { content: qc.diseaseTraces.percentage || '' }, { content: '', colSpan: 3 } ],
+        [{ content: 'Nbr Fruit avec trace de maladie', rowSpan: 2, styles: { fillColor: colors.lime300, fontStyle: 'bold' } },
+        { content: 'Nbr de fruits (max 10u)', styles: { fillColor: colors.lime200, fontStyle: 'bold', halign: 'center' } },
+        { content: 'Poids', styles: { fillColor: colors.lime200, fontStyle: 'bold', halign: 'center' } },
+        { content: '%', styles: { fillColor: colors.lime200, fontStyle: 'bold', halign: 'center' } },
+        { content: '', colSpan: 3 }],
+        [{ content: qc.diseaseTraces.count || '' }, { content: qc.diseaseTraces.weight || '' }, { content: qc.diseaseTraces.percentage || '' }, { content: '', colSpan: 3 }],
 
-        [ { content: 'Nbr fruit murs', rowSpan: 2, styles: { fillColor: colors.lime300, fontStyle: 'bold' } },
-          { content: 'Nbr de fruits (max 0u)', styles: { fillColor: colors.lime200, fontStyle: 'bold', halign: 'center' } },
-          { content: 'Poids', styles: { fillColor: colors.lime200, fontStyle: 'bold', halign: 'center' } },
-          { content: '%', styles: { fillColor: colors.lime200, fontStyle: 'bold', halign: 'center' } },
-          { content: '', colSpan: 3 } ],
-        [ { content: qc.ripeFruit.count || '' }, { content: qc.ripeFruit.weight || '' }, { content: qc.ripeFruit.percentage || '' }, { content: '', colSpan: 3 } ],
+        [{ content: 'Nbr fruit murs', rowSpan: 2, styles: { fillColor: colors.lime300, fontStyle: 'bold' } },
+        { content: 'Nbr de fruits (max 0u)', styles: { fillColor: colors.lime200, fontStyle: 'bold', halign: 'center' } },
+        { content: 'Poids', styles: { fillColor: colors.lime200, fontStyle: 'bold', halign: 'center' } },
+        { content: '%', styles: { fillColor: colors.lime200, fontStyle: 'bold', halign: 'center' } },
+        { content: '', colSpan: 3 }],
+        [{ content: qc.ripeFruit.count || '' }, { content: qc.ripeFruit.weight || '' }, { content: qc.ripeFruit.percentage || '' }, { content: '', colSpan: 3 }],
 
-        [ { content: 'Nbr fruit Terreux', rowSpan: 2, styles: { fillColor: colors.lime300, fontStyle: 'bold' } },
-          { content: 'Nbr de fruits (max 8u)', styles: { fillColor: colors.lime200, fontStyle: 'bold', halign: 'center' } },
-          { content: 'Poids', styles: { fillColor: colors.lime200, fontStyle: 'bold', halign: 'center' } },
-          { content: '%', styles: { fillColor: colors.lime200, fontStyle: 'bold', halign: 'center' } },
-          { content: '', colSpan: 3 } ],
-        [ { content: qc.dirtyFruit.count || '' }, { content: qc.dirtyFruit.weight || '' }, { content: qc.dirtyFruit.percentage || '' }, { content: '', colSpan: 3 } ],
+        [{ content: 'Nbr fruit Terreux', rowSpan: 2, styles: { fillColor: colors.lime300, fontStyle: 'bold' } },
+        { content: 'Nbr de fruits (max 8u)', styles: { fillColor: colors.lime200, fontStyle: 'bold', halign: 'center' } },
+        { content: 'Poids', styles: { fillColor: colors.lime200, fontStyle: 'bold', halign: 'center' } },
+        { content: '%', styles: { fillColor: colors.lime200, fontStyle: 'bold', halign: 'center' } },
+        { content: '', colSpan: 3 }],
+        [{ content: qc.dirtyFruit.count || '' }, { content: qc.dirtyFruit.weight || '' }, { content: qc.dirtyFruit.percentage || '' }, { content: '', colSpan: 3 }],
 
-        [ { content: 'Epiderme et brulures de soleil', rowSpan: 2, styles: { fillColor: colors.lime300, fontStyle: 'bold' } },
-          { content: 'Nbr de fruits (max 6cm²)', styles: { fillColor: colors.lime200, fontStyle: 'bold', halign: 'center' } },
-          { content: 'Poids', styles: { fillColor: colors.lime200, fontStyle: 'bold', halign: 'center' } },
-          { content: '%', styles: { fillColor: colors.lime200, fontStyle: 'bold', halign: 'center' } },
-          { content: '', colSpan: 3 } ],
-        [ { content: qc.sunBurns.count || '' }, { content: qc.sunBurns.weight || '' }, { content: qc.sunBurns.percentage || '' }, { content: '', colSpan: 3 } ],
+        [{ content: 'Epiderme et brulures de soleil', rowSpan: 2, styles: { fillColor: colors.lime300, fontStyle: 'bold' } },
+        { content: 'Nbr de fruits (max 6cm²)', styles: { fillColor: colors.lime200, fontStyle: 'bold', halign: 'center' } },
+        { content: 'Poids', styles: { fillColor: colors.lime200, fontStyle: 'bold', halign: 'center' } },
+        { content: '%', styles: { fillColor: colors.lime200, fontStyle: 'bold', halign: 'center' } },
+        { content: '', colSpan: 3 }],
+        [{ content: qc.sunBurns.count || '' }, { content: qc.sunBurns.weight || '' }, { content: qc.sunBurns.percentage || '' }, { content: '', colSpan: 3 }],
 
-  [ { content: 'Nbr fruit Sans pédoncule', rowSpan: 2, styles: { fillColor: colors.lime300, fontStyle: 'bold' } },
-          { content: 'Nbr de fruits', styles: { fillColor: colors.lime200, fontStyle: 'bold', halign: 'center' } },
-          { content: 'Poids', styles: { fillColor: colors.lime200, fontStyle: 'bold', halign: 'center' } },
-          { content: '%', styles: { fillColor: colors.lime200, fontStyle: 'bold', halign: 'center' } },
-          { content: '', colSpan: 3 } ],
-        [ { content: qc.withoutStem.count || '' }, { content: qc.withoutStem.weight || '' }, { content: qc.withoutStem.percentage || '' }, { content: '', colSpan: 3 } ],
+        [{ content: 'Nbr fruit Sans pédoncule', rowSpan: 2, styles: { fillColor: colors.lime300, fontStyle: 'bold' } },
+        { content: 'Nbr de fruits', styles: { fillColor: colors.lime200, fontStyle: 'bold', halign: 'center' } },
+        { content: 'Poids', styles: { fillColor: colors.lime200, fontStyle: 'bold', halign: 'center' } },
+        { content: '%', styles: { fillColor: colors.lime200, fontStyle: 'bold', halign: 'center' } },
+        { content: '', colSpan: 3 }],
+        [{ content: qc.withoutStem.count || '' }, { content: qc.withoutStem.weight || '' }, { content: qc.withoutStem.percentage || '' }, { content: '', colSpan: 3 }],
 
-        [ { content: 'Totalité des défauts %', styles: { fillColor: colors.lime300, fontStyle: 'bold' } }, { content: currentLot.data.totalDefects || '', colSpan: 6 } ],
-        [ { content: 'Couleur C/NC', styles: { fillColor: colors.lime300, fontStyle: 'bold' } }, { content: currentLot.data.color || '', colSpan: 6 } ],
-        [ { content: 'Odeur C / NC', styles: { fillColor: colors.lime300, fontStyle: 'bold' } }, { content: currentLot.data.odor || '', colSpan: 6 } ],
-        [ { content: 'Décision + Action', styles: { fillColor: colors.lime300, fontStyle: 'bold' } }, { content: currentLot.data.decision || '', colSpan: 6 } ],
+        [{ content: 'Totalité des défauts %', styles: { fillColor: colors.lime300, fontStyle: 'bold' } }, { content: currentLot.data.totalDefects || '', colSpan: 6 }],
+        [{ content: 'Couleur C/NC', styles: { fillColor: colors.lime300, fontStyle: 'bold' } }, { content: currentLot.data.color || '', colSpan: 6 }],
+        [{ content: 'Odeur C / NC', styles: { fillColor: colors.lime300, fontStyle: 'bold' } }, { content: currentLot.data.odor || '', colSpan: 6 }],
+        [{ content: 'Décision + Action', styles: { fillColor: colors.lime300, fontStyle: 'bold' } }, { content: currentLot.data.decision || '', colSpan: 6 }],
       ],
-  columnStyles: { 0: { cellWidth: 65 } },
+      columnStyles: {
+        0: { cellWidth: 40 },
+        1: { cellWidth: 40 },
+        2: { cellWidth: 40 },
+        3: { cellWidth: 40 },
+        4: { cellWidth: 40 },
+        5: { cellWidth: 40 },
+      },
     });
 
     // Notes and visa
@@ -468,7 +481,7 @@ const ControleReception: React.FC = () => {
       margin: { left: margin, right: margin, bottom: 34 },
       theme: 'grid',
       body: [
-        [ { content: "Note : en cas de présence — En cas d'un taux élevé (10%) des écarts il faut identifier le lot par une F.P et informer le R.Q" } ],
+        [{ content: "Note : en cas de présence — En cas d'un taux élevé (10%) des écarts il faut identifier le lot par une F.P et informer le R.Q" }],
       ],
     });
 
@@ -496,7 +509,7 @@ const ControleReception: React.FC = () => {
     const fileName = `Fiche_Controle_Reception_${currentLot.lotNumber.replace(/\s+/g, '_')}_${new Date().toISOString().slice(0, 10)}.pdf`;
     doc.save(fileName);
   };
-  
+
   const calculatePercentages = (checks: QualityControlData['qualityChecks'], totalWeight: number) => {
     const updatedChecks = { ...checks };
 
@@ -522,21 +535,24 @@ const ControleReception: React.FC = () => {
     });
   };
 
+  // Helper function to render a checkbox symbol
+  const checkbox = (checked: boolean): string => (checked ? '☑' : '☐');
+
   if (!currentLot) return <div>Chargement...</div>;
-  
+
   return (
     <div className="bg-gradient-to-b from-green-50 to-white min-h-screen p-4">
       <div className="max-w-6xl mx-auto bg-white rounded-xl shadow-xl">
         {/* Header Controls */}
         <div className="bg-white border-b p-4 shadow-sm rounded-t-xl sticky top-0 z-10">
-            <div className="flex flex-col gap-2 md:flex-row md:justify-between md:items-center mb-2">
+          <div className="flex flex-col gap-2 md:flex-row md:justify-between md:items-center mb-2">
             <div>
               <h1 className="text-2xl font-bold text-gray-800">Fiche de Contrôle à la Réception - Avocat</h1>
               <p className="text-sm text-gray-500">Créez, éditez et archivez vos contrôles de réception.</p>
             </div>
             <div className="flex gap-2">
               <button onClick={createNewLot} className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
-              <Plus size={20} /> Nouveau Lot
+                <Plus size={20} /> Nouveau Lot
               </button>
               <button onClick={saveDraftToFirebase} disabled={saving} className="flex items-center gap-2 bg-emerald-600 disabled:opacity-60 text-white px-4 py-2 rounded-lg hover:bg-emerald-700 transition-colors">
                 <Save size={18} /> {saving ? 'Sauvegarde...' : 'Enregistrer'}
@@ -550,17 +566,15 @@ const ControleReception: React.FC = () => {
               <div key={lot.id} className="flex items-center bg-gray-100 rounded-lg overflow-hidden">
                 <button
                   onClick={() => setCurrentLotId(lot.id)}
-                  className={`px-4 py-2 flex items-center gap-2 transition-all ${
-                    currentLotId === lot.id ? 'bg-green-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                  }`}
+                  className={`px-4 py-2 flex items-center gap-2 transition-all ${currentLotId === lot.id ? 'bg-green-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    }`}
                 >
                   <Package size={16} />
                   {lot.lotNumber}
-                  <span className={`px-2 py-1 text-xs rounded-full ${
-                    lot.status === 'termine' ? 'bg-green-200 text-green-800' :
+                  <span className={`px-2 py-1 text-xs rounded-full ${lot.status === 'termine' ? 'bg-green-200 text-green-800' :
                     lot.status === 'en_cours' ? 'bg-yellow-200 text-yellow-800' :
-                    'bg-gray-200 text-gray-600'
-                  }`}>
+                      'bg-gray-200 text-gray-600'
+                    }`}>
                     {lot.status}
                   </span>
                 </button>
@@ -841,7 +855,7 @@ const ControleReception: React.FC = () => {
                   {/* Fruit avec trace de maladie */}
                   <tr>
                     <td className="bg-lime-300 border border-black p-1 font-bold" rowSpan={2}>Nbr Fruit avec trace de maladie</td>
-                    <td className="bg-lime-200 border border-black p-1 font-bold text-center">Nbr de fruits<br/>(max 10u)</td>
+                    <td className="bg-lime-200 border border-black p-1 font-bold text-center">Nbr de fruits<br />(max 10u)</td>
                     <td className="bg-lime-200 border border-black p-1 font-bold text-center">Poids</td>
                     <td className="bg-lime-200 border border-black p-1 font-bold text-center">%</td>
                     <td className="border border-black p-1" colSpan={3}></td>
@@ -877,7 +891,7 @@ const ControleReception: React.FC = () => {
                   {/* Nbr fruit murs */}
                   <tr>
                     <td className="bg-lime-300 border border-black p-1 font-bold" rowSpan={2}>Nbr fruit murs</td>
-                    <td className="bg-lime-200 border border-black p-1 font-bold text-center">Nbr de fruits<br/>(max 0u)</td>
+                    <td className="bg-lime-200 border border-black p-1 font-bold text-center">Nbr de fruits<br />(max 0u)</td>
                     <td className="bg-lime-200 border border-black p-1 font-bold text-center">Poids</td>
                     <td className="bg-lime-200 border border-black p-1 font-bold text-center">%</td>
                     <td className="border border-black p-1" colSpan={3}></td>
@@ -913,7 +927,7 @@ const ControleReception: React.FC = () => {
                   {/* Nbr fruit Terreux */}
                   <tr>
                     <td className="bg-lime-300 border border-black p-1 font-bold" rowSpan={2}>Nbr fruit Terreux</td>
-                    <td className="bg-lime-200 border border-black p-1 font-bold text-center">Nbr de fruits<br/>(max 8u)</td>
+                    <td className="bg-lime-200 border border-black p-1 font-bold text-center">Nbr de fruits<br />(max 8u)</td>
                     <td className="bg-lime-200 border border-black p-1 font-bold text-center">Poids</td>
                     <td className="bg-lime-200 border border-black p-1 font-bold text-center">%</td>
                     <td className="border border-black p-1" colSpan={3}></td>
@@ -949,7 +963,7 @@ const ControleReception: React.FC = () => {
                   {/* Epiderme et brulures de soleil */}
                   <tr>
                     <td className="bg-lime-300 border border-black p-1 font-bold" rowSpan={2}>Epiderme et brulures de soleil</td>
-                    <td className="bg-lime-200 border border-black p-1 font-bold text-center">Nbr de fruits<br/>(max 6cm²)</td>
+                    <td className="bg-lime-200 border border-black p-1 font-bold text-center">Nbr de fruits<br />(max 6cm²)</td>
                     <td className="bg-lime-200 border border-black p-1 font-bold text-center">Poids</td>
                     <td className="bg-lime-200 border border-black p-1 font-bold text-center">%</td>
                     <td className="border border-black p-1" colSpan={3}></td>
@@ -1117,7 +1131,7 @@ const ControleReception: React.FC = () => {
           <h2 className="text-xl font-semibold">Archives - Fiches de Contrôle Réception</h2>
         </div>
         <p className="text-sm text-gray-500 mb-4">Les archives sont des copies figées de vos fiches de contrôle. Utilisez Archiver pour sauvegarder une fiche.</p>
-        
+
         {loadingArchives ? (
           <div className="text-gray-500 text-center py-8">Chargement des archives...</div>
         ) : archives.length === 0 ? (
@@ -1128,21 +1142,20 @@ const ControleReception: React.FC = () => {
               <div key={archive.id} className="border rounded-lg p-4 hover:shadow-md transition-shadow">
                 <div className="flex items-center justify-between mb-2">
                   <div className="font-medium">{archive.lotNumber}</div>
-                  <span className={`px-2 py-1 text-xs rounded-full ${
-                    archive.status === 'termine' ? 'bg-green-200 text-green-800' :
+                  <span className={`px-2 py-1 text-xs rounded-full ${archive.status === 'termine' ? 'bg-green-200 text-green-800' :
                     archive.status === 'en_cours' ? 'bg-yellow-200 text-yellow-800' :
-                    'bg-gray-200 text-gray-600'
-                  }`}>
+                      'bg-gray-200 text-gray-600'
+                    }`}>
                     {archive.status}
                   </span>
                 </div>
-                
+
                 <div className="text-sm text-gray-600 mb-3">
                   <div>Prestataire: {archive.data.header.provider}</div>
                   <div>Variété: {archive.data.header.variety}</div>
                   <div>Date: {archive.data.header.deliveryDate}</div>
                 </div>
-                
+
                 <div className="flex gap-2">
                   <button
                     onClick={() => loadFromArchive(archive)}
@@ -1157,7 +1170,7 @@ const ControleReception: React.FC = () => {
                     Supprimer
                   </button>
                 </div>
-                
+
                 <div className="text-xs text-gray-400 mt-2">
                   Archivé le: {archive.updatedAt.toLocaleDateString('fr-FR')}
                 </div>
